@@ -1,0 +1,179 @@
+/**
+ * Styles for AI Autocomplete Extension
+ * Completion overlay styling that matches target element appearance
+ */
+
+.ai-autocomplete-overlay {
+  /* Positioning */
+  position: fixed;
+  z-index: 2147483647; /* Maximum z-index to ensure visibility */
+  pointer-events: none; /* Don't interfere with page interaction */
+
+  /* Appearance */
+  color: #999999;
+  opacity: 0.5;
+  background: transparent;
+
+  /* Typography - will be overridden by element styles */
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+
+  /* Text rendering */
+  white-space: pre;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Visibility */
+  display: none;
+
+  /* Transitions */
+  transition: opacity 0.15s ease-in-out;
+}
+
+/* Show overlay when active */
+.ai-autocomplete-overlay[style*="display: inline"] {
+  display: inline !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-autocomplete-overlay {
+    color: #666666;
+    opacity: 0.6;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ai-autocomplete-overlay {
+    opacity: 0.7;
+    font-weight: 500;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ai-autocomplete-overlay {
+    transition: none;
+  }
+}
+
+/**
+ * Optional: Style adjustments for specific websites
+ * These can be added as needed for better compatibility
+ */
+
+/* Gmail specific styles */
+[role="textbox"] .ai-autocomplete-overlay,
+.editable .ai-autocomplete-overlay {
+  white-space: pre-wrap;
+}
+
+/* Google Docs specific styles */
+.kix-cursor .ai-autocomplete-overlay {
+  position: absolute;
+}
+
+/* Twitter/X specific styles */
+[data-text="true"] .ai-autocomplete-overlay {
+  word-wrap: break-word;
+}
+
+/* LinkedIn specific styles */
+.ql-editor .ai-autocomplete-overlay {
+  white-space: pre-wrap;
+}
+
+/* Slack specific styles */
+.ql-container .ai-autocomplete-overlay {
+  white-space: pre-wrap;
+}
+
+/**
+ * Accessibility: Ensure overlay doesn't interfere with screen readers
+ */
+.ai-autocomplete-overlay {
+  aria-hidden: true;
+  role: presentation;
+}
+
+/**
+ * Print media: Hide overlay when printing
+ */
+@media print {
+  .ai-autocomplete-overlay {
+    display: none !important;
+  }
+}
+
+/**
+ * Focus styles: Ensure overlay is visible during focus
+ * but doesn't interfere with native focus indicators
+ */
+input:focus ~ .ai-autocomplete-overlay,
+textarea:focus ~ .ai-autocomplete-overlay,
+[contenteditable="true"]:focus .ai-autocomplete-overlay {
+  /* Keep default styles */
+}
+
+/**
+ * Animation for smooth appearance
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+.ai-autocomplete-overlay {
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-autocomplete-overlay {
+    animation: none;
+  }
+}
+
+/**
+ * Compatibility fixes for common CSS frameworks
+ */
+
+/* Bootstrap */
+.ai-autocomplete-overlay {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
+/* Tailwind CSS */
+.ai-autocomplete-overlay {
+  all: unset;
+  position: fixed !important;
+  color: #999999 !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+}
+
+/**
+ * Prevent conflicts with page styles
+ */
+.ai-autocomplete-overlay {
+  text-decoration: none !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background-image: none !important;
+  background-color: transparent !important;
+}
