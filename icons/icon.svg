@@ -1,0 +1,20 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded rectangle background -->
+  <rect width="128" height="128" rx="28" fill="url(#grad)"/>
+
+  <!-- AI text with modern font -->
+  <text x="64" y="78" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">AI</text>
+
+  <!-- Cursor/autocomplete indicator -->
+  <rect x="90" y="50" width="4" height="32" fill="white" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite"/>
+  </rect>
+</svg>
