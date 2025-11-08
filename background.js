@@ -33,6 +33,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Fetch and cache models
   await fetchAndCacheModels();
+
+  // Set up periodic model refresh (every 24 hours)
+  chrome.alarms.create('refreshModels', { periodInMinutes: 1440 });
 });
 
 /**
@@ -294,9 +297,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Refresh models cache periodically (every 24 hours)
-chrome.alarms.create('refreshModels', { periodInMinutes: 1440 });
-
+// Handle alarm events for periodic model refresh
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'refreshModels') {
     fetchAndCacheModels();
