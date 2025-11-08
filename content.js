@@ -227,6 +227,8 @@ function getCursorCoordinatesForContentEditable(element) {
  * Create or update completion overlay
  */
 function showCompletion(element, completion) {
+  console.log('[AI Autocomplete] showCompletion called:', completion);
+
   if (!completion) {
     hideCompletion();
     return;
@@ -236,12 +238,16 @@ function showCompletion(element, completion) {
 
   // Get cursor position
   const coords = getCursorCoordinates(element);
+  console.log('[AI Autocomplete] Cursor coordinates:', coords);
+
   if (!coords) {
+    console.log('[AI Autocomplete] No coordinates, cannot show overlay');
     return;
   }
 
   // Create overlay if it doesn't exist
   if (!completionOverlay) {
+    console.log('[AI Autocomplete] Creating new overlay element');
     completionOverlay = document.createElement('span');
     completionOverlay.className = 'ai-autocomplete-overlay';
     document.body.appendChild(completionOverlay);
@@ -262,6 +268,13 @@ function showCompletion(element, completion) {
   completionOverlay.style.left = `${coords.left}px`;
   completionOverlay.style.top = `${coords.top}px`;
   completionOverlay.style.display = 'inline';
+
+  console.log('[AI Autocomplete] Overlay positioned at:', {
+    left: coords.left,
+    top: coords.top,
+    text: completion,
+    visible: completionOverlay.style.display
+  });
 }
 
 /**
@@ -336,6 +349,8 @@ async function requestCompletion(context) {
   // Generate new request ID
   currentRequestId = `req_${Date.now()}_${Math.random()}`;
 
+  console.log('[AI Autocomplete] Sending request to background:', currentRequestId);
+
   try {
     const response = await chrome.runtime.sendMessage({
       action: 'getCompletion',
@@ -343,15 +358,20 @@ async function requestCompletion(context) {
       requestId: currentRequestId
     });
 
-    if (response.success && response.completion) {
+    console.log('[AI Autocomplete] Background response:', response);
+
+    if (response && response.success && response.completion) {
       // Limit completion to COMPLETION_WORD_LIMIT words
       const words = response.completion.trim().split(/\s+/);
       const limitedCompletion = words.slice(0, COMPLETION_WORD_LIMIT).join(' ');
 
+      console.log('[AI Autocomplete] Processed completion:', limitedCompletion);
       return limitedCompletion;
+    } else {
+      console.log('[AI Autocomplete] No valid completion in response');
     }
   } catch (error) {
-    console.error('Error requesting completion:', error);
+    console.error('[AI Autocomplete] Error requesting completion:', error);
   }
 
   return null;
@@ -394,25 +414,38 @@ function handleInput(event) {
 async function triggerCompletion(element) {
   const { text, cursorPos } = getElementContext(element);
 
+  console.log('[AI Autocomplete] Trigger completion:', { textLength: text.length, cursorPos, text: text.slice(-50) });
+
   // Check if cursor is at the end of text
   if (cursorPos !== text.length) {
+    console.log('[AI Autocomplete] Cursor not at end, skipping');
     return;
   }
 
   // Check minimum context length
   if (text.length < MIN_CONTEXT_LENGTH) {
+    console.log('[AI Autocomplete] Text too short, skipping');
     return;
   }
 
   // Extract context
   const context = extractContext(text, cursorPos);
+  console.log('[AI Autocomplete] Requesting completion for context:', context);
 
   // Request completion
   const completion = await requestCompletion(context);
+  console.log('[AI Autocomplete] Received completion:', completion);
 
   // Show completion if element is still focused
   if (completion && element === document.activeElement && element === currentElement) {
+    console.log('[AI Autocomplete] Showing completion');
     showCompletion(element, completion);
+  } else {
+    console.log('[AI Autocomplete] Not showing completion:', {
+      hasCompletion: !!completion,
+      isActive: element === document.activeElement,
+      isCurrent: element === currentElement
+    });
   }
 }
 

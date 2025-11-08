@@ -155,11 +155,20 @@ function cacheCompletion(context, model, completion) {
  * Get completion from OpenRouter API
  */
 async function getCompletion(context, requestId) {
+  console.log('[Background] getCompletion called:', { context, requestId });
+
   try {
     // Get API key and selected model from storage
     const { apiKey, selectedModel } = await chrome.storage.sync.get(['apiKey', 'selectedModel']);
 
+    console.log('[Background] Settings:', {
+      hasApiKey: !!apiKey,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'none',
+      model: selectedModel || DEFAULT_MODEL
+    });
+
     if (!apiKey) {
+      console.error('[Background] No API key configured');
       throw new Error('API key not configured');
     }
 
@@ -168,17 +177,18 @@ async function getCompletion(context, requestId) {
     // Check cache first
     const cached = getCachedCompletion(context, model);
     if (cached) {
-      console.log('Returning cached completion');
+      console.log('[Background] Returning cached completion:', cached);
       return { success: true, completion: cached };
     }
 
     // Check rate limit
     if (isRateLimited()) {
-      console.log('Rate limit exceeded, skipping request');
+      console.log('[Background] Rate limit exceeded, skipping request');
       return { success: false, error: 'Rate limit exceeded' };
     }
 
     recordRequest();
+    console.log('[Background] Making API request to OpenRouter...');
 
     // Create abort controller for this request
     const controller = new AbortController();
@@ -215,17 +225,24 @@ async function getCompletion(context, requestId) {
     // Clean up active request
     activeRequests.delete(requestId);
 
+    console.log('[Background] API response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[Background] API error response:', errorText);
       throw new Error(`API request failed: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('[Background] API response data:', data);
+
     const completion = data.choices?.[0]?.message?.content?.trim() || '';
+    console.log('[Background] Extracted completion:', completion);
 
     // Cache the completion
     if (completion) {
       cacheCompletion(context, model, completion);
+      console.log('[Background] Cached completion');
     }
 
     return { success: true, completion };
@@ -234,11 +251,11 @@ async function getCompletion(context, requestId) {
     activeRequests.delete(requestId);
 
     if (error.name === 'AbortError') {
-      console.log('Request cancelled');
+      console.log('[Background] Request cancelled');
       return { success: false, error: 'Request cancelled' };
     }
 
-    console.error('Error getting completion:', error);
+    console.error('[Background] Error getting completion:', error);
     return { success: false, error: error.message };
   }
 }
